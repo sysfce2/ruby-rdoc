@@ -847,7 +847,9 @@ class RDoc::ClassModule < RDoc::Context
 
   def update_aliases
     constants.each do |const|
-      next unless cm = const.is_alias_for
+      cm = const.is_alias_for
+      cm ||= const.resolved_alias_target if const.is_a?(RDoc::Constant)
+      next unless cm
 
       # Resolve chained aliases (A = B = C) to the real class/module.
       cm = @store.find_class_or_module(cm.full_name) || cm
@@ -865,6 +867,19 @@ class RDoc::ClassModule < RDoc::Context
         cm_alias.parent = self
       end
       cm_alias.full_name = nil # force update for new parent
+
+      # Don't clobber a real (non-alias) class/module already living at this
+      # name. Mirrors the BasicObject = BlankSlate guard in
+      # Context#add_module_alias. Existing alias copies (set by
+      # add_module_alias or a previous update_aliases pass) carry is_alias_for,
+      # so they're still overwritable here.
+      existing = @store.find_class_or_module(cm_alias.full_name)
+      next if existing && !existing.is_alias_for
+
+      # Persist a lazy-resolved target so Stats#report_constants and
+      # Constant#marshal_dump observe the alias relationship. Skipped
+      # aliases (above) intentionally leave the constant unmarked.
+      const.is_alias_for ||= cm
 
       cm_alias.aliases.clear
       cm_alias.is_alias_for = cm
