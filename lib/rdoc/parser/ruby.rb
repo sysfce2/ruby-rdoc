@@ -3,11 +3,6 @@
 require 'prism'
 require_relative 'ripper_state_lex'
 
-# Unlike lib/rdoc/parser/ripper_ruby.rb, this file is not based on rtags and does not contain code from
-#   rtags.rb -
-#   ruby-lex.rb - ruby lexcal analyzer
-#   ruby-token.rb - ruby tokens
-
 # Parse and collect document from Ruby source code.
 
 ##
@@ -129,9 +124,9 @@ require_relative 'ripper_state_lex'
 # Note that by default, the :method: directive will be ignored if there is a
 # standard rdocable item following it.
 
-class RDoc::Parser::PrismRuby < RDoc::Parser
+class RDoc::Parser::Ruby < RDoc::Parser
 
-  parse_files_matching(/\.rbw?$/) unless ENV['RDOC_USE_RIPPER_PARSER']
+  parse_files_matching(/\.rbw?$/)
 
   attr_accessor :visibility
   attr_reader :container, :singleton, :in_proc_block
@@ -687,7 +682,7 @@ class RDoc::Parser::PrismRuby < RDoc::Parser
     end
 
     # Rename after add_method to register duplicated 'new' and 'initialize'
-    # defined in c and ruby just like the old parser did.
+    # defined in c and ruby.
     if !dont_rename_initialize && method_name == 'initialize' && !singleton
       if meth.dont_rename_initialize
         meth.visibility = :protected

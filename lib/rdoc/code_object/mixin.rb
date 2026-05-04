@@ -72,8 +72,8 @@ class RDoc::Mixin < RDoc::CodeObject
   #
   # As of the beginning of October, 2011, no gem includes nonexistent modules.
   #
-  # When mixin is created from RDoc::Parser::PrismRuby, module name is already a resolved full-path name.
-  #
+  # The Ruby parser passes an already-resolved full-path +name+, so most of this
+  # logic only runs for the C parser, which passes the unresolved local name.
 
   def module
     return @module if @module
